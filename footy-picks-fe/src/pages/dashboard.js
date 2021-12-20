@@ -1,12 +1,18 @@
 import React from "react";
+import { Card, Col, Container, Row } from "react-bootstrap";
+import { LiveScores } from "../components/LiveScores";
+import { ActiveGames } from "../components/ActiveGames";
 
-function Dashboard() {
+export default function Dashboard() {
   return (
-    <div>
-      <h3>Dashboard</h3>
-
-    </div>
+    <Container fluid>
+      <Row>
+        <LiveScores />
+      </Row>
+      <br />
+      <Row>
+        <ActiveGames />
+      </Row>
+    </Container>
   );
 }
-
-export default Dashboard;

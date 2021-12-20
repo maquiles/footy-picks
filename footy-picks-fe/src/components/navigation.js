@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom"
-import { Navbar, Nav, Container } from "react-bootstrap"
+import { Link } from "react-router-dom";
+import { Navbar, Nav, Container } from "react-bootstrap";
 
 const Navigation = () => {
   return (
@@ -10,7 +10,7 @@ const Navigation = () => {
         <Navbar.Toggle aria-controls='reponsive-navbar-nav' />
         <Navbar.Collapse id='responsive-navbar-nav'>
           <Nav>
-            <Nav.Link href='/'>Dashboard</Nav.Link>
+            <Nav.Link href='/scores/live'>Live Scores</Nav.Link>
             <Nav.Link href='/games'>Games</Nav.Link>
           </Nav>
         </Navbar.Collapse>
