@@ -1,28 +1,28 @@
 import React from "react";
 import { Card, Container, Row } from "react-bootstrap";
 import { LiveScoreCard } from "./LiveScoreCard";
-import LiveScore from "../models/LiveScore"
+import Score from "../models/Score"
 
 export default class LiveScores extends React.Component {
   constructor() {
     super();
     this.games = [
-      new LiveScore("CHE", "MNU", "4", "0"),
-      new LiveScore("SCP", "MNC", "3", "0"),
-      new LiveScore("LIV", "PSG", "1", "2"),
-      new LiveScore("RMA", "LIL", "4", "0"),
-      new LiveScore("BAY", "ATL", "5", "1"),
-      new LiveScore("VIL", "BEN", "1", "2"),
-      new LiveScore("INT", "BAR", "1", "3"),
-      new LiveScore("MIL", "AJA", "2", "2"),
-      new LiveScore("DOR", "RBL", "3", "1"),
+      new Score("CHE", "MNU", "4", "0"),
+      new Score("SCP", "MNC", "3", "0"),
+      new Score("LIV", "PSG", "1", "2"),
+      new Score("RMA", "LIL", "4", "0"),
+      new Score("BAY", "ATL", "5", "1"),
+      new Score("VIL", "BEN", "1", "2"),
+      new Score("INT", "BAR", "1", "3"),
+      new Score("MIL", "AJA", "2", "2"),
+      new Score("DOR", "RBL", "3", "1"),
     ];
   }
   
   render() {
     return (
       <Container fluid>
-        <Card bg={'success'} text={'light'}>
+        <Card bg={'dark'} text={'light'}>
           <Card.Header as="h4">Live Scores</Card.Header>
           <Card.Body>
             <Row md={ 9 }>
