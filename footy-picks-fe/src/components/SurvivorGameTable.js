@@ -10,10 +10,12 @@ export function SurvivorGameTable(props) {
         <Card.Body>
           <Table striped bordered hover>
             <thead>
-              <th>Player</th>
-              <th>Round 1</th>
-              <th>Round 2</th>
-              <th>Round 3</th>
+              <tr>
+                <th>Player</th>
+                <th>Round 1</th>
+                <th>Round 2</th>
+                <th>Round 3</th>
+              </tr>
             </thead>
             <tbody>
               <tr>

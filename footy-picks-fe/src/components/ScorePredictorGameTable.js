@@ -12,11 +12,13 @@ export function ScorePredictorGameTable(props) {
             {/* TODO: table order matters */}
             {/* TODO: add tab to card that shows score picks for current round */}
             <thead>
-              <th>Player</th>
-              <th>Points</th>
-              <th>Exact</th>
-              <th>Close</th>
-              <th>Outcome</th>
+              <tr>
+                <th>Player</th>
+                <th>Points</th>
+                <th>Exact</th>
+                <th>Close</th>
+                <th>Outcome</th>
+              </tr>
             </thead>
             <tbody>
               <tr>

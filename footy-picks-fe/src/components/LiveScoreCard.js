@@ -6,7 +6,7 @@ export function LiveScoreCard(props) {
     <Col>
       <Card className="text-center" bg={'dark'} text={'light'} style={{ width: '11rem' }}>
         <Card.Body>
-          <Card.Title>{props.homeTeam} {props.homeScore} - {props.awayScore} {props.awayTeam}</Card.Title>
+          <Card.Title>{props.liveScore.homeTeam} {props.liveScore.homeScore} - {props.liveScore.awayScore} {props.liveScore.awayTeam}</Card.Title>
         </Card.Body>
       </Card>
     </Col>

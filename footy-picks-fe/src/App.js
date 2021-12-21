@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from './pages/dashboard';
 import Games from './pages/games';
 import Navbar from './components/navigation';
-import { LiveScores } from './components/LiveScores';
+import LiveScores from './components/LiveScores';
 import NewGameForm from './pages/NewGameForm';
 
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Accordion, Button, Card, Col, Container, ListGroup, Row, Tab } from "react-bootstrap";
 import { SurvivorGameTable } from "../components/SurvivorGameTable";
 
-function Games() {
+export default function Games() {
   return (
     <Container fluid>
       <Row>
@@ -32,7 +32,7 @@ function Games() {
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>
-            <Button className="mt-2" variant="primary" href="/games/new"> New Game</Button> 
+            <Button className="mt-2 mb-2" variant="primary" href="/games/new"> New Game</Button> 
           </Col>
           <Col>
             <Tab.Content>
@@ -57,5 +57,3 @@ function Games() {
     </Container>
   );
 }
-
-export default Games;
