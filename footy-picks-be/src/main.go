@@ -24,13 +24,8 @@ func (app *App) initRoutes() {
 	// health
 	app.Router.HandleFunc("/health", app.HealthHandler).Methods("GET")
 
-	// login/create
-	app.Router.HandleFunc("/auth/login", app.LoginHandler).Methods("POST")
-	app.Router.HandleFunc("/auth/new-player", app.NewPlayerHandler).Methods("POST")
-	app.Router.HandleFunc("/auth/token-refresh", checkTokenHandler(app.RefreshTokenHandler)).Methods("GET")
-
-	// fetch data
-	app.Router.HandleFunc("/api/user", checkTokenHandler(GetUserHandler)).Methods("GET")
+	// get fotmob data
+	app.Router.HandleFunc("/match-data/refresh", app.MatchDataRefreshHandler).Methods("GET")
 }
 func (a *App) Run(addr string) {
 	log.Println("Starting Server at", addr)
