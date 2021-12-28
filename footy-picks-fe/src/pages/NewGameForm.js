@@ -54,7 +54,7 @@ export default class NewGameForm extends React.Component {
                 style={{ color: 'white'}}
                 checked={this.state.privateGame}
                 onChange={this.handleCheck}/>
-              <Form.Control name="gamePassword" hidden={!this.state.privateGame} type="password" placeholder="Private Game Password" />
+              <Form.Control name="gamePassword" hidden={!this.state.privateGame} type="password" placeholder="Private Game Code" />
             </Form.Group>
 
             <Button variant="primary" type="submit">Create Game</Button>
