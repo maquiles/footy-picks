@@ -1,13 +1,30 @@
 import React from "react";
 import { Accordion, Button, Card, Col, Container, ListGroup, Row, Tab } from "react-bootstrap";
 import SurvivorGameTable from "../components/SurvivorGameTable";
+import { MockUserPlayer } from "../repo/getMockData";
+import { getActiveGames } from "../repo/gameService";
 
 export default class Games extends React.Component {
   constructor() {
     super();
 
-    this.activeGames = JSON.parse(localStorage.activeGames);
-    this.pastGames = JSON.parse(localStorage.pastGames);
+    this.state = {
+      fetched: false,
+      activeGames: {},
+      pastGames: {}
+    };
+    // this.pastGames = JSON.parse(localStorage.pastGames);
+  }
+
+  componentDidMount() {
+    getActiveGames(MockUserPlayer)
+      .then(response => response.json())
+      .then(body => {
+        this.setState({
+          fetched: true,
+          activeGames: body
+        });
+      });
   }
 
   render() {
@@ -21,7 +38,7 @@ export default class Games extends React.Component {
                   <Accordion.Header>Active Games</Accordion.Header>
                   <Accordion.Body>
                     <ListGroup>
-                      {this.activeGames.map((game) => {
+                      {this.state.activeGames.map((game) => {
                         const href = "#active-game-"+game.id; 
                         return <ListGroup.Item action href={href} key={game.id}>{game.name}</ListGroup.Item>
                       })}
@@ -32,7 +49,7 @@ export default class Games extends React.Component {
                   <Accordion.Header>Past Games</Accordion.Header>
                   <Accordion.Body>
                     <ListGroup>
-                      {this.pastGames.map((game) => {
+                      {this.state.pastGames.map((game) => {
                         const href = "#past-game-"+game.id; 
                         return <ListGroup.Item action href={href} key={game.id}>{game.name}</ListGroup.Item>
                       })}

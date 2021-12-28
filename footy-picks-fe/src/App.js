@@ -6,17 +6,14 @@ import Navbar from './components/navigation';
 import LiveScores from './components/LiveScores';
 import NewGameForm from './pages/NewGameForm';
 import React from 'react';
-import { getActiveGames, getPastGames } from './services/gameService';
-import { MockUserPlayer } from './services/getMockData';
+import { MockUserPlayer } from './repo/getMockData';
 
 
 export default class App extends React.Component {
   constructor() {
     super();
 
-    const player = MockUserPlayer;
-    localStorage.activeGames = JSON.stringify(getActiveGames(player));
-    localStorage.pastGames = JSON.stringify(getPastGames(player));
+    localStorage.player = MockUserPlayer;
   }
 
   render() {

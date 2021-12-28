@@ -1,12 +1,46 @@
 import React from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
+import { getActiveGames } from "../repo/gameService";
+import { MockUserPlayer } from "../repo/getMockData";
 import SurvivorGameTable from "./SurvivorGameTable";
 
 
 export default class ActiveGames extends React.Component {
   constructor() {
     super();
-    this.games = JSON.parse(localStorage.activeGames);
+    this.state = {
+      games: {},
+      fetched: false
+    };
+  }
+
+  componentDidMount() {
+    getActiveGames(MockUserPlayer)
+      .then(response => response.json())
+      .then(body => {
+        this.setState({
+          fetched: true,
+          games: body
+        });
+      });
+  }
+
+  handleFetching() {
+    if (!this.state.fetched) {
+      return <p>Fetching data...</p>
+    } else {
+      return (
+        <Row>
+          {this.state.games.map(function(game) {
+            return (
+              <Col key={game.name}>
+                <SurvivorGameTable gameTitle={game.name} league={game.league} rows={game.rows}/>
+              </Col>
+            );
+          })}          
+        </Row>
+      );
+    }
   }
 
   render() {
@@ -15,15 +49,7 @@ export default class ActiveGames extends React.Component {
         <Card bg="dark" text="light">
           <Card.Body>
             <Card.Title as="h4">Active Games</Card.Title>
-            <Row>
-              {this.games.map(function(game) {
-                return (
-                  <Col key={game.name}>
-                    <SurvivorGameTable gameTitle={game.name} league={game.league} rows={game.rows}/>
-                  </Col>
-                )
-              })}          
-            </Row>
+            {this.handleFetching()}
           </Card.Body>
         </Card>
       </Container>

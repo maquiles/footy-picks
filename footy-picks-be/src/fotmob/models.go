@@ -1,28 +1,4 @@
-package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-)
-
-// FOTMOB URLS
-var FOTMOB_BASE_URL string = "https://www.fotmob.com"
-var MATCHES_URL string = FOTMOB_BASE_URL + "/matches?"
-var LEAGUES_URL string = FOTMOB_BASE_URL + "/leagues?"
-var TEAMS_URL string = FOTMOB_BASE_URL + "/teams?"
-var PLAYERS_URL string = FOTMOB_BASE_URL + "/platerData?"
-var MATCH_DETAILS_URL string = FOTMOB_BASE_URL + "/matchDetails?"
-var SEARCH_URL = FOTMOB_BASE_URL + "/searchapi/"
-
-//FOTMOB LEAGUE IDS
-var LEAGUE_IDS map[string]string = map[string]string{
-	"UCL":  "42",
-	"EPL":  "47",
-	"EURO": "50",
-}
+package fotmob
 
 //FOTMOB MODELS
 type Team struct {
@@ -92,27 +68,4 @@ type LeagueResponse struct {
 	Seostr     string        `json:"seostr"`
 	Tab        string        `json:"tab"`
 	Tabs       []string      `json:"tabs"`
-}
-
-func GetLeagueMatches(league string, tab string, timezone string) []Match {
-	leaugeID := LEAGUE_IDS[league]
-	url := fmt.Sprintf("%stimezone=%s&id=%s&tab=%s", LEAGUES_URL, timezone, leaugeID, tab)
-	log.Printf("sending fotmob request %s", url)
-
-	response, err := http.Get(url)
-	if err != nil {
-		log.Println("ERROR in getLeague >>", err)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println("error parsing response body from getLeague >>", err)
-	}
-
-	var leagueResponse LeagueResponse
-	json.Unmarshal(body, &leagueResponse)
-
-	matches := leagueResponse.MatchesTab.Data.AllMatches
-
-	return matches
 }

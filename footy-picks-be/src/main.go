@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"footypicks/fotmob"
 	"log"
 	"net/http"
 
@@ -22,38 +23,51 @@ func Init() *App {
 }
 
 // ROUTE HANDLERS
-func (app *App) HealthHandler(writer http.ResponseWriter, request *http.Request) {
-	log.Println("received /health request")
+func HealthHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received GET - /HEALTH request")
 	json.NewEncoder(writer).Encode("literally just vibin")
 }
 
-func (app *App) MatchDataRefreshHandler(writer http.ResponseWriter, request *http.Request) {
+func CurrentRoundHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received GET - /ROUND/CURRENT request")
+
 	league := request.FormValue("league")
 	tab := request.FormValue("tab")
-	timeZone := request.FormValue("timezone")
+	timezone := request.FormValue("timezone")
 
-	response := GetLeagueMatches(league, tab, timeZone)
+	response := fotmob.GetCurrentRoundMatches(league, tab, timezone)
+
 	json.NewEncoder(writer).Encode(response)
+}
+
+func GamesForUserHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received GET - /GAMES request")
+	user := request.FormValue("user")
+
+	activeGames := GetActiveGamesForUser(user)
+
+	json.NewEncoder(writer).Encode(activeGames)
 }
 
 // ROUTES
 func (app *App) initRoutes() {
 	// health
-	app.Router.HandleFunc("/health", app.HealthHandler).Methods("GET")
-
-	// get fotmob data
-	app.Router.HandleFunc("/match-data/refresh", app.MatchDataRefreshHandler).Methods("GET").Queries(
+	app.Router.HandleFunc("/health", HealthHandler).Methods("GET")
+	app.Router.HandleFunc("/round/current", CurrentRoundHandler).Methods("GET").Queries(
 		"league", "{league}",
 		"tab", "{tab}",
 		"timezone", "{timezone}")
+	app.Router.HandleFunc("/games", GamesForUserHandler).Methods("GET").Queries("user", "{user}")
 }
 
 func (a *App) Run(addr string) {
 	log.Println("Starting Server at", addr)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
+		AllowedHeaders:   []string{"X-Requested-With", "Access-Control-Allow-Origin"},
+		AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "OPTIONS"},
 	})
 	handler := c.Handler(a.Router)
 
