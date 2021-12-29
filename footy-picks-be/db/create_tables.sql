@@ -54,5 +54,4 @@ INSERT INTO player (player_id, email, player_name, player_login, created, games)
 /* survivor_games */
 
 
-
 /* survivor_picks */
