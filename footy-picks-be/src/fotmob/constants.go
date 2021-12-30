@@ -10,8 +10,8 @@ var MATCH_DETAILS_URL string = FOTMOB_BASE_URL + "/matchDetails?"
 var SEARCH_URL = FOTMOB_BASE_URL + "/searchapi/"
 
 //FOTMOB LEAGUE IDS
-var LEAGUE_IDS map[string]string = map[string]string{
-	"UCL":  "42",
-	"EPL":  "47",
-	"EURO": "50",
+var LEAGUE_IDS map[string]int = map[string]int{
+	"UCL":  42,
+	"EPL":  47,
+	"EURO": 50,
 }

@@ -11,7 +11,7 @@ import (
 // PRIVATE
 func getFotmobLeague(league string, tab string, timezone string) LeagueResponse {
 	leaugeID := LEAGUE_IDS[league]
-	url := fmt.Sprintf("%stimezone=%s&id=%s&tab=%s", LEAGUES_URL, timezone, leaugeID, tab)
+	url := fmt.Sprintf("%stimezone=%s&id=%d&tab=%s", LEAGUES_URL, timezone, leaugeID, tab)
 	log.Printf("sending fotmob request %s", url)
 
 	response, err := http.Get(url)
@@ -63,4 +63,9 @@ func GetCurrentRoundMatches(league string, tab string, timezone string) []Match 
 	matchesByRound := sortAllLeagueMatchesByRound(matches)
 
 	return matchesByRound[currentRound]
+}
+
+func GetNextRound(league string, tab string, timezone string) int {
+	leagueResponse := getFotmobLeague(league, tab, timezone)
+	return getFirstRoundWithUnplatedMatch(leagueResponse)
 }

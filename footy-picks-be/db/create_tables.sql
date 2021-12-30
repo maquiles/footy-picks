@@ -16,7 +16,8 @@ CREATE TABLE survivor_game (
   ongoing boolean NOT NULL,
   beginning_round integer NOT NULL,
   created timestamp(6) NOT NULL,
-  creator integer REFERENCES player
+  creator integer REFERENCES player,
+  players integer[] NOT NULL
 );
 
 CREATE TABLE survivor_pick (
