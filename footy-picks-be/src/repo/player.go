@@ -2,6 +2,8 @@ package repo
 
 import (
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type PlayerEntity struct {
@@ -15,13 +17,15 @@ type PlayerEntity struct {
 
 func (repo Repo) CreateNewPlayer(email string, name string, login string) (PlayerEntity, error) {
 	created := getCurrentTimestamp()
+	hash, _ := bcrypt.GenerateFromPassword([]byte(login), bcrypt.DefaultCost)
+
 	query := `
 		INSERT INTO player (email, player_name, player_login, created, games)
 			VALUES ($1, $2, $3, $4, '{}')
 			RETURNING player_id`
 
 	var playerID int
-	err := repo.DBConn.QueryRow(query, email, name, login, created).Scan(&playerID)
+	err := repo.DBConn.QueryRow(query, email, name, string(hash), created).Scan(&playerID)
 	if err != nil {
 		log.Println("error creating new player >>", err)
 		return PlayerEntity{ID: -1}, err
@@ -47,9 +51,8 @@ func (repo Repo) UpdatePlayerGames(playerID int, gameID int) error {
 	return err
 }
 
-func (repo Repo) GetPlayerByEmail(email string) (PlayerEntity, error) {
-	query := `
-		SELECT * FROM player WHERE email = $1`
+func (repo Repo) GetPlayer(email string) (PlayerEntity, error) {
+	query := `SELECT * FROM player WHERE email = $1`
 
 	var player PlayerEntity
 	err := repo.DBConn.QueryRow(query, email).Scan(
@@ -61,8 +64,8 @@ func (repo Repo) GetPlayerByEmail(email string) (PlayerEntity, error) {
 		&player.Games)
 
 	if err != nil {
-		log.Print("error getting player with email %s >> %s", email, err)
-		return PlayerEntity{ID: -1}, err
+		log.Printf("error getting player with email %s >> %s", email, err)
+		return PlayerEntity{ID: 0}, err
 	}
 
 	return player, nil

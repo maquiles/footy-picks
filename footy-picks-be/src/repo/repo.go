@@ -32,5 +32,7 @@ func InitDBConn() Repo {
 		panic(err)
 	}
 
+	defer db.Close()
+
 	return Repo{DBConn: db}
 }

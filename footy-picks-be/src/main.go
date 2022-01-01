@@ -27,6 +27,9 @@ func (app *App) initRoutes() {
 	// player
 	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST")
 	app.Router.HandleFunc("/player/game", app.AddPlayerGameHandler).Methods("POST")
+
+	// login
+	app.Router.HandleFunc("/login", app.LoginHandler).Methods("POST")
 }
 
 func Init() *App {
