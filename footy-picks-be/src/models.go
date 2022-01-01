@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 // for returning survivor game data to FE
 type SurvivorGamePick struct {
 	Round   int    `json:"round"`
@@ -46,9 +44,4 @@ type NewPlayerGame struct {
 type Login struct {
 	Email string `json:"email"`
 	Login string `json:"login"`
-}
-
-type Token struct {
-	TokenString string    `json:"token_string"`
-	ExpireTime  time.Time `json:"expire_time"`
 }

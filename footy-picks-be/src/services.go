@@ -2,20 +2,23 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (app App) SignIn(login Login) (Player, Token, error) {
+func (app App) SignIn(login Login, writer http.ResponseWriter) (Player, error) {
 	playerEntity, err := app.DBConn.GetPlayer(login.Email)
 	if err != nil {
-		return Player{ID: 0}, Token{}, err
+		http.Error(writer, err.Error(), http.StatusNotFound)
+		return Player{}, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(playerEntity.PlayerLogin), []byte(login.Login))
 	if err != nil {
 		log.Printf("error incorrect creds for player with email %s >> %s", login.Email, err)
-		return Player{ID: -1}, Token{}, err
+		http.Error(writer, err.Error(), http.StatusUnauthorized)
+		return Player{}, err
 	}
 
 	player := Player{
@@ -26,10 +29,10 @@ func (app App) SignIn(login Login) (Player, Token, error) {
 		Games:      playerEntity.Games,
 	}
 
-	token, err := GenerateJWT(player)
+	err = GenerateJWT(player, writer)
 	if err != nil {
-		return Player{ID: -2}, token, err
+		return Player{}, err
 	}
 
-	return player, token, nil
+	return player, nil
 }

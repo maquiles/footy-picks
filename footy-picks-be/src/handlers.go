@@ -79,24 +79,13 @@ func (app *App) LoginHandler(writer http.ResponseWriter, request *http.Request) 
 	err := json.NewDecoder(request.Body).Decode(&login)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	player, token, err := app.SignIn(login)
+	player, err := app.SignIn(login, writer)
 	if err != nil {
-		if player.ID == 0 {
-			http.Error(writer, err.Error(), http.StatusNotFound)
-		} else if player.ID == -1 {
-			http.Error(writer, err.Error(), http.StatusUnauthorized)
-		} else {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-		}
+		return
 	}
-
-	http.SetCookie(writer, &http.Cookie{
-		Name:    "token",
-		Value:   token.TokenString,
-		Expires: token.ExpireTime,
-	})
 
 	json.NewEncoder(writer).Encode(player)
 }
