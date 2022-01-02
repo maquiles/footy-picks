@@ -84,3 +84,42 @@ func (repo Repo) GetSurvivorGameByID(gameID int) (SurvivorGameEntity, error) {
 
 	return game, nil
 }
+
+func (repo Repo) GetGamesForPlayer(playerID int) ([]SurvivorGameEntity, error) {
+	query := `SELECT * FROM survivor_game WHERE game_id = ANY(unnest(SELECT games FROM player WHERE player_id = $1));`
+
+	rows, err := repo.DBConn.Query(query, playerID)
+	defer rows.Close()
+	if err != nil {
+		log.Printf("error getting games for player with id = %d >> %s", playerID, err)
+		return []SurvivorGameEntity{}, err
+	}
+
+	var games []SurvivorGameEntity
+	for rows.Next() {
+		var game SurvivorGameEntity
+		err = rows.Scan(
+			&game.ID,
+			&game.GameName,
+			&game.Passcode,
+			&game.LeagueID,
+			&game.League,
+			&game.Ongoing,
+			&game.BeginningRound,
+			&game.Created,
+			&game.Creator,
+			&game.Players,
+		)
+		if err != nil {
+			log.Printf("error scanning games for player with id = %d >> %s", playerID, err)
+		}
+
+		games = append(games, game)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("error while iterating through games for player with id = %d >> %s", playerID, err)
+	}
+
+	return games, nil
+}

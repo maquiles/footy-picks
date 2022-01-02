@@ -36,3 +36,21 @@ func (app App) SignIn(login Login, writer http.ResponseWriter) (Player, error) {
 
 	return player, nil
 }
+
+func (app App) GetAllGamesForPlayer(id int) (PlayerSurvivorGames, error) {
+	games, err := app.DBConn.GetGamesForPlayer(id)
+	if err != nil {
+		return PlayerSurvivorGames{}, err
+	}
+
+	var gamesSorted PlayerSurvivorGames
+	for _, game := range games {
+		if game.Ongoing {
+			gamesSorted.ActiveGames = append(gamesSorted.ActiveGames, game)
+		} else {
+			gamesSorted.PastGames = append(gamesSorted.PastGames, game)
+		}
+	}
+
+	return gamesSorted, nil
+}

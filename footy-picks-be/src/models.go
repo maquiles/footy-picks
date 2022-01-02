@@ -1,5 +1,7 @@
 package main
 
+import "footypicks/repo"
+
 // for returning survivor game data to FE
 type SurvivorGamePick struct {
 	Round   int    `json:"round"`
@@ -44,4 +46,11 @@ type NewPlayerGame struct {
 type Login struct {
 	Email string `json:"email"`
 	Login string `json:"login"`
+}
+
+// for game requests
+
+type PlayerSurvivorGames struct {
+	ActiveGames []repo.SurvivorGameEntity `json:"active_games"`
+	PastGames   []repo.SurvivorGameEntity `json:"past_games"`
 }

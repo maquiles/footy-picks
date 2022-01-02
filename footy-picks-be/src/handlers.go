@@ -5,6 +5,9 @@ import (
 	"footypicks/fotmob"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // ROUTE HANDLERS
@@ -27,12 +30,26 @@ func CurrentRoundHandler(writer http.ResponseWriter, request *http.Request) {
 
 func (app *App) GamesForUserHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received GET - /GAMES request")
-	user := request.FormValue("user")
 
-	// TODO
-	// activeGames := GetActiveGamesForUser(user)
+	if err := AuthenticateJWT(writer, request); err != nil {
+		return
+	}
 
-	// json.NewEncoder(writer).Encode(activeGames)
+	params := mux.Vars(request)
+	playerParam := params["player_id"]
+	playerID, err := strconv.Atoi(playerParam)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	activeGames, err := app.GetAllGamesForPlayer(playerID)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(writer).Encode(activeGames)
 }
 
 // PLAYER CRUD
@@ -43,6 +60,7 @@ func (app *App) CreateNewPlayerHandler(writer http.ResponseWriter, request *http
 	err := json.NewDecoder(request.Body).Decode(&newPlayer)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	player, err := app.DBConn.CreateNewPlayer(newPlayer.Email, newPlayer.Name, newPlayer.Login)
@@ -59,11 +77,13 @@ func (app *App) AddPlayerGameHandler(writer http.ResponseWriter, request *http.R
 	err := json.NewDecoder(request.Body).Decode(&newPlayerGame)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	err = app.DBConn.UpdatePlayerGames(newPlayerGame.PlayerID, newPlayerGame.GameID)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	log.Printf("successfully add game_id %d to player_id %d", newPlayerGame.GameID, newPlayerGame.PlayerID)
