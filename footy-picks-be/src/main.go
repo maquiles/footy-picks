@@ -36,7 +36,7 @@ func (app *App) initRoutes() {
 	// TODO app.Router.HandleFunc("/game/{game_id}/picks", app.GetGamePicksHandler).Methods("GET")
 
 	// player
-	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST")
+	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST") // todo
 	app.Router.HandleFunc("/player/game", app.AddPlayerGameHandler).Methods("POST")
 
 	// login

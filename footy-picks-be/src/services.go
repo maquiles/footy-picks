@@ -37,6 +37,7 @@ func (app App) SignIn(login Login, writer http.ResponseWriter) (Player, error) {
 	return player, nil
 }
 
+// GAME
 func (app App) GetAllGamesForPlayer(id int) (PlayerSurvivorGames, error) {
 	games, err := app.DBConn.GetGamesForPlayer(id)
 	if err != nil {

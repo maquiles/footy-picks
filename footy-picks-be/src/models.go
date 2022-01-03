@@ -49,8 +49,14 @@ type Login struct {
 }
 
 // for game requests
-
 type PlayerSurvivorGames struct {
 	ActiveGames []repo.SurvivorGameEntity `json:"active_games"`
 	PastGames   []repo.SurvivorGameEntity `json:"past_games"`
+}
+
+type NewGameBody struct {
+	CreatorID int    `json:"creator"`
+	Name      string `json:"name"`
+	Passcode  string `json:"passcode"`
+	League    string `json:"league"`
 }

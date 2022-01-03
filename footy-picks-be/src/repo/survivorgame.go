@@ -18,7 +18,7 @@ type SurvivorGameEntity struct {
 	Players        []int  `json:"players"`
 }
 
-func (repo Repo) CreateNewSurvivorGame(playerID int, gameName string, passcode string, league string) SurvivorGameEntity {
+func (repo Repo) CreateNewSurvivorGame(playerID int, gameName string, passcode string, league string) (SurvivorGameEntity, error) {
 	leagueID := fotmob.LEAGUE_IDS[league]
 	beginningRound := fotmob.GetNextRound(league, "matches", "America/New_York")
 	created := getCurrentTimestamp()
@@ -34,7 +34,7 @@ func (repo Repo) CreateNewSurvivorGame(playerID int, gameName string, passcode s
 	err := repo.DBConn.QueryRow(query, gameName, passcode, leagueID, league, true, beginningRound, created, playerID, players).Scan(&gameID)
 	if err != nil {
 		log.Println("error creating new game >>", err)
-		return SurvivorGameEntity{ID: -1}
+		return SurvivorGameEntity{}, err
 	}
 
 	return SurvivorGameEntity{
@@ -48,7 +48,7 @@ func (repo Repo) CreateNewSurvivorGame(playerID int, gameName string, passcode s
 		Created:        created,
 		Creator:        playerID,
 		Players:        players,
-	}
+	}, nil
 }
 
 func (repo Repo) AddPlayerToSurvivorGame(playerID int, gameID int) error {

@@ -10,12 +10,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ROUTE HANDLERS
+// HEALTH
 func HealthHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received GET - /HEALTH request")
 	json.NewEncoder(writer).Encode("literally just vibin")
 }
 
+// MATCH DATA
 func CurrentRoundHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received GET - /ROUND/CURRENT request")
 
@@ -26,6 +27,34 @@ func CurrentRoundHandler(writer http.ResponseWriter, request *http.Request) {
 	response := fotmob.GetCurrentRoundMatches(league, tab, timezone)
 
 	json.NewEncoder(writer).Encode(response)
+}
+
+// GAMES
+func (app App) NewGameHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received POST - /GAME request")
+
+	if err := AuthenticateJWT(writer, request); err != nil {
+		return
+	}
+
+	var newGameBody NewGameBody
+	err := json.NewDecoder(request.Body).Decode(&newGameBody)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newGame, err := app.DBConn.CreateNewSurvivorGame(
+		newGameBody.CreatorID,
+		newGameBody.Name,
+		newGameBody.Passcode,
+		newGameBody.League)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(writer).Encode(newGame)
 }
 
 func (app *App) GamesForUserHandler(writer http.ResponseWriter, request *http.Request) {
