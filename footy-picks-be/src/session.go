@@ -45,36 +45,37 @@ func GenerateJWT(player Player, writer http.ResponseWriter) error {
 	return nil
 }
 
-func AuthenticateJWT(writer http.ResponseWriter, request *http.Request) error {
+func AuthenticateJWT(writer http.ResponseWriter, request *http.Request) (int, error) {
 	cookie, err := request.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
 			http.Error(writer, err.Error(), http.StatusUnauthorized)
-			return err
+			return -1, err
 		}
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return err
+		return -1, err
 	}
 
 	tokenString := cookie.Value
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	var claims Claims
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			http.Error(writer, err.Error(), http.StatusUnauthorized)
-			return err
+			return -1, err
 		}
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return err
+		return -1, err
 	}
 
 	if !token.Valid {
 		http.Error(writer, err.Error(), http.StatusUnauthorized)
-		return fmt.Errorf("InvalidTokenError")
+		return -1, fmt.Errorf("InvalidTokenError")
 	}
 
-	return nil
+	return claims.ID, nil
 }
 
 func RefreshJWT(writer http.ResponseWriter, request *http.Request) error {
@@ -107,7 +108,7 @@ func RefreshJWT(writer http.ResponseWriter, request *http.Request) error {
 		return fmt.Errorf("InvalidTokenError")
 	}
 
-	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 30*time.Second {
+	if time.Until(time.Unix(claims.ExpiresAt, 0)) > 30*time.Second {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return fmt.Errorf("RefreshTokenError")
 	}

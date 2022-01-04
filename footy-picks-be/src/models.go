@@ -37,11 +37,6 @@ type NewPlayer struct {
 	Login string `json:"login"`
 }
 
-type NewPlayerGame struct {
-	PlayerID int `json:"player_id"`
-	GameID   int `json:"game_id"`
-}
-
 // for login requests
 type Login struct {
 	Email string `json:"email"`
@@ -59,4 +54,10 @@ type NewGameBody struct {
 	Name      string `json:"name"`
 	Passcode  string `json:"passcode"`
 	League    string `json:"league"`
+}
+
+type AddPlayerToGameBody struct {
+	PlayerID int    `json:"player_id"`
+	GameID   int    `json:"game_id"`
+	Passcode string `json:"passcode"`
 }

@@ -29,16 +29,17 @@ func CurrentRoundHandler(writer http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(writer).Encode(response)
 }
 
-// GAMES
+// GAME
 func (app App) NewGameHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received POST - /GAME request")
 
-	if err := AuthenticateJWT(writer, request); err != nil {
+	_, err := AuthenticateJWT(writer, request)
+	if err != nil {
 		return
 	}
 
 	var newGameBody NewGameBody
-	err := json.NewDecoder(request.Body).Decode(&newGameBody)
+	err = json.NewDecoder(request.Body).Decode(&newGameBody)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -57,10 +58,40 @@ func (app App) NewGameHandler(writer http.ResponseWriter, request *http.Request)
 	json.NewEncoder(writer).Encode(newGame)
 }
 
-func (app *App) GamesForUserHandler(writer http.ResponseWriter, request *http.Request) {
+func (app App) GetGameHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received GET - /GAME/{game_id} request")
+
+	playerID, err := AuthenticateJWT(writer, request)
+	if err != nil {
+		return
+	}
+
+	params := mux.Vars(request)
+	gameIDParam := params["game_id"]
+	gameID, err := strconv.Atoi(gameIDParam)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	game, err := app.GetSurvivorGameDetails(gameID, playerID)
+	if err != nil {
+		if err.Error() == "NotInvitedError" {
+			http.Error(writer, err.Error(), http.StatusForbidden)
+		} else {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(writer).Encode(game)
+}
+
+func (app *App) GamesForPlayerHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received GET - /GAMES request")
 
-	if err := AuthenticateJWT(writer, request); err != nil {
+	playerIDFromCookie, err := AuthenticateJWT(writer, request)
+	if err != nil {
 		return
 	}
 
@@ -69,6 +100,11 @@ func (app *App) GamesForUserHandler(writer http.ResponseWriter, request *http.Re
 	playerID, err := strconv.Atoi(playerParam)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if playerIDFromCookie != playerID {
+		http.Error(writer, "PlayerImpersonationError", http.StatusForbidden)
 		return
 	}
 
@@ -81,7 +117,58 @@ func (app *App) GamesForUserHandler(writer http.ResponseWriter, request *http.Re
 	json.NewEncoder(writer).Encode(activeGames)
 }
 
-// PLAYER CRUD
+func (app App) AddPlayerToGameHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received POST - /GAME/PLAYER request")
+
+	playerIDFromCookie, err := AuthenticateJWT(writer, request)
+	if err != nil {
+		return
+	}
+
+	params := mux.Vars(request)
+	playerID, err := strconv.Atoi(params["player_id"])
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if playerIDFromCookie != playerID {
+		http.Error(writer, "PlayerImpersonationError", http.StatusForbidden)
+		return
+	}
+
+	gameID, err := strconv.Atoi(params["game_id"])
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var body struct {
+		Passcode string `json:"passcode"`
+	}
+
+	err = json.NewDecoder(request.Body).Decode(&body)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	gameDeets := AddPlayerToGameBody{
+		PlayerID: playerID,
+		GameID:   gameID,
+		Passcode: body.Passcode,
+	}
+
+	err = app.JoinGame(gameDeets)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(writer).Encode("success")
+}
+
+// PLAYER
 func (app *App) CreateNewPlayerHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received POST - /PLAYER request")
 
@@ -93,36 +180,33 @@ func (app *App) CreateNewPlayerHandler(writer http.ResponseWriter, request *http
 	}
 
 	player, err := app.DBConn.CreateNewPlayer(newPlayer.Email, newPlayer.Name, newPlayer.Login)
-	// TODO error handling
-	log.Printf("successfully created new player with id %d", player.ID)
-
-	json.NewEncoder(writer).Encode(player)
-}
-
-func (app *App) AddPlayerGameHandler(writer http.ResponseWriter, request *http.Request) {
-	log.Println("received POST - /PLAYER/GAMES request")
-
-	var newPlayerGame NewPlayerGame
-	err := json.NewDecoder(request.Body).Decode(&newPlayerGame)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = app.DBConn.UpdatePlayerGames(newPlayerGame.PlayerID, newPlayerGame.GameID)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("successfully add game_id %d to player_id %d", newPlayerGame.GameID, newPlayerGame.PlayerID)
+	log.Printf("successfully created new player with id %d", player.ID)
+	json.NewEncoder(writer).Encode(player)
+}
 
-	json.NewEncoder(writer).Encode(1)
+func (app App) MakeGamePickHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received POST - /PLAYER/{player_id}/GAME/{game_id}/PICK request")
+
+	playerID, err := AuthenticateJWT(writer, request)
+	if err != nil {
+		return
+	}
+
+	// TODO
+	// create new survivor game pick record
+	// make sure that game is still ongoing
+	// make sure that player is still in the game
+	// make sure that the cookie player id matches the request id (should probably add this for all other player routes)
 }
 
 // AUTH
 func (app *App) LoginHandler(writer http.ResponseWriter, request *http.Request) {
-	log.Println("received POST = /LOGIN request")
+	log.Println("received POST - /LOGIN request")
 
 	var login Login
 	err := json.NewDecoder(request.Body).Decode(&login)
@@ -137,4 +221,14 @@ func (app *App) LoginHandler(writer http.ResponseWriter, request *http.Request) 
 	}
 
 	json.NewEncoder(writer).Encode(player)
+}
+
+func (app App) RefreshLoginHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received POST - /login/refresh")
+
+	if err := RefreshJWT(writer, request); err != nil {
+		return
+	}
+
+	json.NewEncoder(writer).Encode("success")
 }

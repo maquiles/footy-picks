@@ -19,29 +19,26 @@ func (app *App) initRoutes() {
 	// health
 	app.Router.HandleFunc("/health", HealthHandler).Methods("GET")
 
-	// fotmob
+	// matche data
 	app.Router.HandleFunc("/round/current", CurrentRoundHandler).Methods("GET").Queries(
 		"league", "{league}",
 		"tab", "{tab}",
 		"timezone", "{timezone}")
 
 	// game
-	app.Router.HandleFunc("/games/{player_id}", app.GamesForUserHandler).Methods("GET")
 	app.Router.HandleFunc("/game", app.NewGameHandler).Methods("POST")
-	// TODO app.Router.HandleFunc("/game/player", app.AddPlayerToGameHandler).Methods("POST")
-	// TODO app.Router.HandleFunc("/game/pick", app.MakeGamePickHandler).Methods("POST")
-	// TODO app.Router.HandleFunc("/game/{game_id}", app.GetGameHandler).Methods("GET")
-	// TODO app.Router.HandleFunc("/game/{game_id}/players", app.GetPlayersForGameHandler).Methods("GET")
+	app.Router.HandleFunc("/game/{game_id}", app.GetGameHandler).Methods("GET") // TODO: can't get game if player is not part of it
 	// TODO app.Router.HandleFunc("/game/{game_id}/table", app.GetTableForGame).Methods("GET")
-	// TODO app.Router.HandleFunc("/game/{game_id}/picks", app.GetGamePicksHandler).Methods("GET")
 
-	// player
-	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST") // todo
-	app.Router.HandleFunc("/player/game", app.AddPlayerGameHandler).Methods("POST")
+	// player - TODO: make sure player id from cookie matches request so you can't pick for other players
+	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST")
+	app.Router.HandleFunc("/player/{player_id}/games", app.GamesForPlayerHandler).Methods("GET")
+	app.Router.HandleFunc("/player/{player_id}/game/{game_id}", app.AddPlayerToGameHandler).Methods("POST")
+	app.Router.HandleFunc("/player/{player_id}/game/{game_id}/pick", app.MakeGamePickHandler).Methods("POST")
 
-	// login
+	// auth
 	app.Router.HandleFunc("/login", app.LoginHandler).Methods("POST")
-	// TODO app.Router.HandleFunc("/login/refresh", app.RefreshLoginHandler).Methods("POST")
+	app.Router.HandleFunc("/login/refresh", app.RefreshLoginHandler).Methods("POST")
 }
 
 func Init() *App {

@@ -89,11 +89,11 @@ func (repo Repo) GetGamesForPlayer(playerID int) ([]SurvivorGameEntity, error) {
 	query := `SELECT * FROM survivor_game WHERE game_id = ANY(unnest(SELECT games FROM player WHERE player_id = $1));`
 
 	rows, err := repo.DBConn.Query(query, playerID)
-	defer rows.Close()
 	if err != nil {
 		log.Printf("error getting games for player with id = %d >> %s", playerID, err)
 		return []SurvivorGameEntity{}, err
 	}
+	defer rows.Close()
 
 	var games []SurvivorGameEntity
 	for rows.Next() {
@@ -122,4 +122,16 @@ func (repo Repo) GetGamesForPlayer(playerID int) ([]SurvivorGameEntity, error) {
 	}
 
 	return games, nil
+}
+
+func (repo Repo) GetGameIDByPasscode(passcode string) (int, error) {
+	query := `SELECT game_id FROM survivor_game WHERE passcode = $1`
+
+	var id int
+	err := repo.DBConn.QueryRow(query, passcode).Scan(&id)
+	if err != nil {
+		return -1, err
+	}
+
+	return id, nil
 }
