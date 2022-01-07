@@ -168,6 +168,35 @@ func (app App) AddPlayerToGameHandler(writer http.ResponseWriter, request *http.
 	json.NewEncoder(writer).Encode("success")
 }
 
+func (app App) GetTableForGameHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Println("received GET - /GET/{game_id}/TABLE request")
+
+	params := mux.Vars(request)
+	gameParam := params["game_id"]
+	gameID, err := strconv.Atoi(gameParam)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	playerID, err := AuthenticateJWT(writer, request)
+	if err != nil {
+		return
+	}
+
+	table, err := app.GetSurvivorGameTable(gameID, playerID)
+	if err != nil {
+		if err.Error() == "NotInvitedError" {
+			http.Error(writer, err.Error(), http.StatusForbidden)
+		} else {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(writer).Encode(table)
+}
+
 // PLAYER
 func (app *App) CreateNewPlayerHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Println("received POST - /PLAYER request")

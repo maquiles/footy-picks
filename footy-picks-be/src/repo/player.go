@@ -70,3 +70,15 @@ func (repo Repo) GetPlayer(email string) (PlayerEntity, error) {
 
 	return player, nil
 }
+
+func (repo Repo) GetPlayerNameByID(playerID int) (string, error) {
+	query := `SELECT name from player where player_id = $1`
+	var name string
+	err := repo.DBConn.QueryRow(query, playerID).Scan(&name)
+	if err != nil {
+		log.Printf("error getting name for player = %d", playerID)
+		return "", err
+	}
+
+	return name, nil
+}

@@ -6,7 +6,7 @@ import "footypicks/repo"
 type SurvivorGamePick struct {
 	Round   int    `json:"round"`
 	Pick    string `json:"pick"`
-	Correct bool   `json:"correct"`
+	Correct int    `json:"correct"`
 }
 
 type SurvivorGameTableRow struct {

@@ -49,7 +49,7 @@ func (app App) GetAllGamesForPlayer(id int) (PlayerSurvivorGames, error) {
 
 	var gamesSorted PlayerSurvivorGames
 	for _, game := range games {
-		if game.Ongoing {
+		if game.Ongoing >= 0 {
 			gamesSorted.ActiveGames = append(gamesSorted.ActiveGames, game)
 		} else {
 			gamesSorted.PastGames = append(gamesSorted.PastGames, game)
@@ -142,4 +142,57 @@ func (app App) MakeSurvivorPick(pick SurvivorGamePickBody, player int) error {
 	}
 
 	return app.DBConn.AddSurvivorGamePick(pick.Round, pick.Pick, pick.Game, player)
+}
+
+func (app App) GetSurvivorGameTable(gameID int, playerID int) (SurvivorGameTable, error) {
+	game, err := app.DBConn.GetSurvivorGameByID(gameID)
+	if err != nil {
+		return SurvivorGameTable{}, err
+	}
+
+	if !contains(game.Players, playerID) {
+		return SurvivorGameTable{}, fmt.Errorf("NotInvitedError")
+	}
+
+	picks, err := app.DBConn.GetAllPicksForSurvivorGame(gameID)
+	if err != nil {
+		return SurvivorGameTable{}, err
+	}
+
+	rows := map[int][]SurvivorGamePick{}
+	for _, pick := range picks {
+		column := SurvivorGamePick{
+			Round:   pick.Round,
+			Pick:    pick.Pick,
+			Correct: pick.Correct,
+		}
+
+		row := rows[pick.Player]
+		if row != nil {
+			row = append(row, column)
+			rows[pick.Player] = row
+		} else {
+			rows[pick.Player] = []SurvivorGamePick{column}
+		}
+	}
+
+	table := SurvivorGameTable{
+		ID:     fmt.Sprint(gameID),
+		Name:   game.GameName,
+		League: game.League,
+		Rows:   []SurvivorGameTableRow{},
+	}
+	for key, value := range rows {
+		playerName, err := app.DBConn.GetPlayerNameByID(key)
+		if err != nil {
+			return SurvivorGameTable{}, err
+		}
+
+		table.Rows = append(table.Rows, SurvivorGameTableRow{
+			Player: playerName,
+			Rounds: value,
+		})
+	}
+
+	return table, nil
 }
