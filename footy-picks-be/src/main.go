@@ -27,10 +27,10 @@ func (app *App) initRoutes() {
 
 	// game
 	app.Router.HandleFunc("/game", app.NewGameHandler).Methods("POST")
-	app.Router.HandleFunc("/game/{game_id}", app.GetGameHandler).Methods("GET") // TODO: can't get game if player is not part of it
+	app.Router.HandleFunc("/game/{game_id}", app.GetGameHandler).Methods("GET")
 	// TODO app.Router.HandleFunc("/game/{game_id}/table", app.GetTableForGame).Methods("GET")
 
-	// player - TODO: make sure player id from cookie matches request so you can't pick for other players
+	// player
 	app.Router.HandleFunc("/player", app.CreateNewPlayerHandler).Methods("POST")
 	app.Router.HandleFunc("/player/{player_id}/games", app.GamesForPlayerHandler).Methods("GET")
 	app.Router.HandleFunc("/player/{player_id}/game/{game_id}", app.AddPlayerToGameHandler).Methods("POST")
