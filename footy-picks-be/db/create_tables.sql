@@ -13,7 +13,7 @@ CREATE TABLE survivor_game (
   passcode varchar(10) UNIQUE,
   league_id integer NOT NULL,
   league varchar(150) NOT NULL,
-  ongoing boolean NOT NULL,
+  ongoing int NOT NULL,
   beginning_round integer NOT NULL,
   created timestamp(6) NOT NULL,
   creator integer REFERENCES player,
@@ -23,7 +23,7 @@ CREATE TABLE survivor_game (
 CREATE TABLE survivor_pick (
   game_round integer NOT NULL,
   pick varchar(10) NOT NULL,
-  correct boolean NOT NULL,
+  correct int NOT NULL,
   game integer REFERENCES survivor_game,
   player integer REFERENCES player,
   PRIMARY KEY (game, game_round, player)

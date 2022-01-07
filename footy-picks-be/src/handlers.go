@@ -197,11 +197,27 @@ func (app App) MakeGamePickHandler(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	// TODO
-	// create new survivor game pick record
-	// make sure that game is still ongoing
-	// make sure that player is still in the game
-	// make sure that the cookie player id matches the request id (should probably add this for all other player routes)
+	var body SurvivorGamePickBody
+	err = json.NewDecoder(request.Body).Decode(&body)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = app.MakeSurvivorPick(body, playerID)
+	if err != nil {
+		if err.Error() == "CompletedGamePickError" ||
+			err.Error() == "NoPicksForOngoingGameError" ||
+			err.Error() == "KnockoutPickError" ||
+			err.Error() == "PickAlreadyMadeError" {
+			http.Error(writer, err.Error(), http.StatusForbidden)
+			return
+		}
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(writer).Encode("success")
 }
 
 // AUTH

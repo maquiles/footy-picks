@@ -61,3 +61,9 @@ type AddPlayerToGameBody struct {
 	GameID   int    `json:"game_id"`
 	Passcode string `json:"passcode"`
 }
+
+type SurvivorGamePickBody struct {
+	Round int    `json:"game_round"`
+	Pick  string `json:"pick"`
+	Game  int    `json:"game_id"`
+}

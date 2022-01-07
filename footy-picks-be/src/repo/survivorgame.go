@@ -11,7 +11,7 @@ type SurvivorGameEntity struct {
 	Passcode       string `json:"passcode"`
 	LeagueID       int    `json:"league_id"`
 	League         string `json:"league"`
-	Ongoing        bool   `json:"ongoing"`
+	Ongoing        int    `json:"ongoing"`
 	BeginningRound int    `json:"beginning_round"`
 	Created        string `json:"created"`
 	Creator        int    `json:"creator"`
@@ -43,7 +43,7 @@ func (repo Repo) CreateNewSurvivorGame(playerID int, gameName string, passcode s
 		Passcode:       passcode,
 		LeagueID:       leagueID,
 		League:         league,
-		Ongoing:        true,
+		Ongoing:        0,
 		BeginningRound: beginningRound,
 		Created:        created,
 		Creator:        playerID,
@@ -112,6 +112,7 @@ func (repo Repo) GetGamesForPlayer(playerID int) ([]SurvivorGameEntity, error) {
 		)
 		if err != nil {
 			log.Printf("error scanning games for player with id = %d >> %s", playerID, err)
+			return []SurvivorGameEntity{}, err
 		}
 
 		games = append(games, game)
@@ -119,6 +120,7 @@ func (repo Repo) GetGamesForPlayer(playerID int) ([]SurvivorGameEntity, error) {
 
 	if err := rows.Err(); err != nil {
 		log.Printf("error while iterating through games for player with id = %d >> %s", playerID, err)
+		return []SurvivorGameEntity{}, err
 	}
 
 	return games, nil
@@ -134,4 +136,11 @@ func (repo Repo) GetGameIDByPasscode(passcode string) (int, error) {
 	}
 
 	return id, nil
+}
+func (repo Repo) UpdateGameOngoingStatus(gameID int, status int) error {
+	query := `UPDATE survivor_game SET ongoing = $1 WHERE game_id = $2`
+
+	_, err := repo.DBConn.Exec(query, status, gameID)
+
+	return err
 }

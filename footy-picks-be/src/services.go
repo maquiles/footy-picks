@@ -100,3 +100,46 @@ func (app App) JoinGame(body AddPlayerToGameBody) error {
 
 	return nil
 }
+
+func (app App) MakeSurvivorPick(pick SurvivorGamePickBody, player int) error {
+	game, err := app.DBConn.GetSurvivorGameByID(pick.Game)
+	if err != nil {
+		log.Printf("error >> could not find game with id = %d", pick.Game)
+		return err
+	}
+
+	if game.Ongoing == -1 {
+		log.Printf("error >> request to make pick for game that is no longer ongoing (player = %d, game = %d", player, pick.Game)
+		return fmt.Errorf("CompletedGamePickError")
+	}
+
+	picks, err := app.DBConn.GetSurvivorGamePicksForPlayer(pick.Game, player)
+	if err != nil {
+		log.Printf("error getting past picks for player = %d and game = %d", player, pick.Game)
+		return err
+	}
+
+	if len(picks) == 0 && game.Ongoing != 0 {
+		log.Printf("error >> no existing picks for ongoing game with id = %d", pick.Game)
+		return fmt.Errorf("NoPicksForOngoingGameError")
+	}
+
+	lastPickCorrect := picks[len(picks)-1].Correct
+	if lastPickCorrect == -1 {
+		log.Printf("error >> player = %d was knowcked out of game = %d", player, pick.Game)
+		return fmt.Errorf("KnockoutPickError")
+	} else if lastPickCorrect == 0 {
+		log.Printf("error >> pick already made for ongoing round")
+		return fmt.Errorf("PickAlreadyMadeError")
+	}
+
+	if game.Ongoing == 0 {
+		err = app.DBConn.UpdateGameOngoingStatus(pick.Game, 1)
+		if err != nil {
+			log.Printf("error updating ongoing status for game = %d", pick.Game)
+			return err
+		}
+	}
+
+	return app.DBConn.AddSurvivorGamePick(pick.Round, pick.Pick, pick.Game, player)
+}
