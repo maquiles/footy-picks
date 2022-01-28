@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
 
 const Navigation = () => {
@@ -12,6 +11,7 @@ const Navigation = () => {
           <Nav>
             <Nav.Link href='/scores'>Scores</Nav.Link>
             <Nav.Link href='/games'>Games</Nav.Link>
+            <Nav.Link href='/login'>Login</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
