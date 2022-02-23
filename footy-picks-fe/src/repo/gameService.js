@@ -1,10 +1,9 @@
+import axios from 'axios';
 import { activeGameOne, activeGameTwo } from "./getMockData";
-
-const BACKEND_URL = "http://localhost:8000"
-const GAMES_URL = "/games"
+import { BACKEND_URL, GAMES_URL } from "./utils";
 
 export function getActiveGames(player) {
-  return fetch(BACKEND_URL+GAMES_URL+"?user=Matthew")
+  return axios.get(BACKEND_URL+GAMES_URL+"?user=Matthew");
 }
 
 export function getPastGames(player) {

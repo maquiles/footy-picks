@@ -3,6 +3,8 @@ package repo
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -31,8 +33,6 @@ func InitDBConn() Repo {
 	if err != nil {
 		panic(err)
 	}
-
-	defer db.Close()
 
 	return Repo{DBConn: db}
 }

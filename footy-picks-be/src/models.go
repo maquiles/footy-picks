@@ -23,11 +23,11 @@ type SurvivorGameTable struct {
 
 // for returning player data to FE
 type Player struct {
-	ID         int    `json:"player_id"`
-	Email      string `json:"email"`
-	PlayerName string `json:"player_name"`
-	Created    string `json:"created"`
-	Games      []int  `json:"games"`
+	ID         int     `json:"player_id"`
+	Email      string  `json:"email"`
+	PlayerName string  `json:"player_name"`
+	Created    string  `json:"created"`
+	Games      []int64 `json:"games"`
 }
 
 // for player requests

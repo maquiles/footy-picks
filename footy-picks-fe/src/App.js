@@ -18,6 +18,10 @@ export default class App extends React.Component {
     localStorage.player = MockUserPlayer;
   }
 
+  requireLogin() {
+    
+  }
+
   render() {
     return (
       <Router>

@@ -3,19 +3,23 @@ package repo
 import (
 	"log"
 
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type PlayerEntity struct {
-	ID          int    `json:"player_id"`
-	Email       string `json:"email"`
-	PlayerName  string `json:"player_name"`
-	PlayerLogin string `json:"player_login"`
-	Created     string `json:"created"`
-	Games       []int  `json:"games"`
+	ID          int           `json:"player_id"`
+	Email       string        `json:"email"`
+	PlayerName  string        `json:"player_name"`
+	PlayerLogin string        `json:"player_login"`
+	Created     string        `json:"created"`
+	Games       pq.Int64Array `json:"games"`
 }
 
 func (repo Repo) CreateNewPlayer(email string, name string, login string) (PlayerEntity, error) {
+	// TODO: make sure that email is valid. currectly will work for any string
+
 	created := getCurrentTimestamp()
 	hash, _ := bcrypt.GenerateFromPassword([]byte(login), bcrypt.DefaultCost)
 
@@ -37,7 +41,7 @@ func (repo Repo) CreateNewPlayer(email string, name string, login string) (Playe
 		PlayerName:  name,
 		PlayerLogin: login,
 		Created:     created,
-		Games:       []int{},
+		Games:       pq.Int64Array{},
 	}, nil
 }
 

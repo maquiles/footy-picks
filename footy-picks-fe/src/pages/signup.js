@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import { createNewAccount } from "../repo/playerService";
 
 export default class SignUp extends React.Component {
   constructor() {
@@ -8,6 +9,7 @@ export default class SignUp extends React.Component {
     this.state = {
       created: false,
       creationError: false,
+      loginConfErr: false
     }
 
     this.onFormSubmit = this.onFormSubmit.bind(this);
@@ -17,8 +19,32 @@ export default class SignUp extends React.Component {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formDataObj = Object.fromEntries(formData.entries());
-    // TODO: make request to backend and redirest to login or catch error
-    this.setState({created: true});
+
+    var pwConf = formDataObj["login"] == formDataObj["confirm-login"]
+    if (!pwConf) {
+      this.setState({loginConfErr: true});
+      return;
+    }
+
+    delete formDataObj["confirm-login"];
+    createNewAccount(formDataObj)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error creating new player >> ' + response.statusText);
+        } else {
+          response.json();
+        }
+      })
+      .then(body => {
+        this.setState({
+          created: true,
+          creationError: false,
+          loginConfErr: false
+        });
+      })
+      .catch((error) => {
+        this.setState({creationError: true})
+      });
   }
 
   render() {
@@ -27,7 +53,7 @@ export default class SignUp extends React.Component {
         <Container fluid>
           <Row>
             <Col xs md="4"/>
-            <Col xs md="4">
+            <Col md="4">
               <Card bg={'dark'} text={'light'}>
                 <Card.Header as="h4">Account Created</Card.Header>
                 <Card.Body>
@@ -39,6 +65,16 @@ export default class SignUp extends React.Component {
           </Row>
         </Container>
       );
+    }
+
+    let loginConfirmed;
+    if (this.state.loginConfErr) {
+      loginConfirmed = <p style={{color: "#FF0000"}}>Passwords don't match. Try again.</p>
+    }
+
+    let creationErr;
+    if (this.state.creationError) {
+      creationErr = <p style={{color: "#FF0000"}}>Error creation new account. Please try again.</p>
     }
 
     return (
@@ -54,6 +90,8 @@ export default class SignUp extends React.Component {
                   <Form.Control className="mb-2" name="name" type="text" placeholder="Name"/>
                   <Form.Control className="mb-2" name="login" type="password" placeholder="Password"/>
                   <Form.Control className="mb-2" name="confirm-login" type="password" placeholder="Confirm Password"/>
+                  {loginConfirmed}
+                  {creationErr}
                   <Button variant="primary" type="submit">Create</Button>
                 </Form>
               </Card.Body>
